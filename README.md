@@ -1,4 +1,4 @@
-# Exploración de salarios profesionales — Ask a Manager 2021
+# 🔎 Exploración de salarios profesionales — Ask a Manager 2021
 
 **Objetivo.** Micrositio de analítica interna para explorar salarios autodeclarados, su distribución geográfica,
 variación por industria y la distribución de la compensación total (en COP).
@@ -7,6 +7,9 @@ variación por industria y la distribución de la compensación total (en COP).
 
 ## Dashboard (Looker Studio)
 
+*El dashboard se puede explorar directamente desde este sitio.*
+
+<br>
 <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid #e5e7eb; border-radius:12px;">
   <iframe
     src="https://lookerstudio.google.com/embed/reporting/ce8927d3-6ec7-4920-8e13-8acaef9ed4f7/page/PgtnF"
@@ -19,6 +22,9 @@ variación por industria y la distribución de la compensación total (en COP).
 ---
 
 ## Documentación
+
+*Haz clic en cualquiera de los temas abajo:*
+
 - 📄 [Modelado de datos](modelado.md)
 - 📊 [Estructura del dashboard](dashboard.md)
 
