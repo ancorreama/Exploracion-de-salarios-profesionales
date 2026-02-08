@@ -51,69 +51,74 @@ garantizando consistencia y facilidad de trazabilidad con la base original.
 ## 3.	Reglas de negocio y supuestos de modelado
 Durante el proceso de modelado se establecieron las siguientes reglas y supuestos:
 
-## 1.	Normalización de texto:
+**1.	Normalización de texto:**
 Los campos de país y ciudad se limpiaron para reducir variaciones de escritura propias de campos de texto libre.
-## 2.	Conversión de salarios desde texto a numérico:
+
+**2.	Conversión de salarios desde texto a numérico:**
 Se eliminaron símbolos monetarios, comas y textos no numéricos.
 Los valores expresados con la letra “k” fueron interpretados como miles (por ejemplo, “80k” → 80,000).
-## 3.	Regla de interpretación de valores pequeños:
+
+**3.	Regla de interpretación de valores pequeños:**
 Cuando el valor numérico resultante es menor a 1000, se asume que el salario fue reportado en miles (por ejemplo, 80 → 80,000 USD).
 Esta decisión se toma debido al uso común de abreviaciones informales en el formulario.
-## 4.	Conversión a pesos colombianos:
+
+**4.	Conversión a pesos colombianos:**
 Todos los valores monetarios se convirtieron a COP utilizando la TRM correspondiente a la fecha del ejercicio, la cual se registra explícitamente en el dataset.
-## 5.	Tratamiento de valores extremos:
+
+**5.	Tratamiento de valores extremos:**
 Se eliminaron valores no plausibles (outliers extremos) con el fin de evitar distorsiones en las visualizaciones y en los promedios presentados en el dashboard.
-## 6.	Enfoque exploratorio:
+
+**6.	Enfoque exploratorio:**
 El análisis y las visualizaciones están pensadas para exploración interna y no para inferencia estadística.
 
 ## 4.	Paso a paso para actualizar los datos y replicar el modelado
 Esta guía explica cómo replicar el proceso de actualización y modelado asumiendo que la estructura del formulario/base original no cambia:
 
-## A. Actualización de datos (extracción)
-1.	Abrir el Google Sheets público de la encuesta.
+**1.  Actualización de datos (extracción)**
+1.  Abrir el Google Sheets público de la encuesta.
 2.	Descargar la versión más reciente como archivo CSV.
 3.	Guardar el archivo con un nombre identificable (ej: Ask_A_Manager_2021_responses.csv).
 
-## B. Cargar datos en Google Colab
-4.	Abrir el notebook de modelado en Google Colab.
-5.	Subir el archivo CSV a Colab (panel Files → Upload).
-6.	Actualizar la variable file_path con el nombre/ruta del archivo cargado.
-7.	Ejecutar la celda de lectura del CSV con pd.read_csv(file_path).
+**2.  Cargar datos en Google Colab**
+1.  Abrir el notebook de modelado en Google Colab.
+2.  Subir el archivo CSV a Colab (panel Files → Upload).
+3.  Actualizar la variable file_path con el nombre/ruta del archivo cargado.
+4.  Ejecutar la celda de lectura del CSV con pd.read_csv(file_path).
 
-## C. Preparación (nombres de columnas)
-8.	Normalizar nombres de columnas (strip, lower, reemplazo de espacios por guiones bajos y eliminación de signos como “?” y paréntesis) para facilitar referencia programática.
-9.	Definir variables base que apunten a las columnas clave del formulario (país, ciudad, salario y compensación), para evitar errores por nombres largos.
+**3.  Preparación (nombres de columnas)**
+1.	Normalizar nombres de columnas (strip, lower, reemplazo de espacios por guiones bajos y eliminación de signos como “?” y paréntesis) para facilitar referencia programática.
+2.	Definir variables base que apunten a las columnas clave del formulario (país, ciudad, salario y compensación), para evitar errores por nombres largos.
 
-## D. Limpieza de ubicación (Country / City)
-10.	Crear country_clean aplicando limpieza de texto (minúsculas, sin puntos, sin espacios dobles).
-11.	Crear country_std aplicando un diccionario de estandarización (por ejemplo, “us/usa/united states” → “United States”).
-12.	Crear city_std removiendo paréntesis, reduciendo espacios repetidos y aplicando formato de título.
+**4.  Limpieza de ubicación (Country / City)**
+1.	Crear country_clean aplicando limpieza de texto (minúsculas, sin puntos, sin espacios dobles).
+2.	Crear country_std aplicando un diccionario de estandarización (por ejemplo, “us/usa/united states” → “United States”).
+3.	Crear city_std removiendo paréntesis, reduciendo espacios repetidos y aplicando formato de título.
 
-## E. Conversión de salarios a numérico (USD)
-13.	Definir una función para convertir los campos de salario y compensación (texto) a números:
-•	Remover comas y símbolos monetarios.
-•	Interpretar formatos tipo “80k” como 80,000.
-•	Regla: si el valor numérico es menor a 1000, interpretarlo como miles (ej: 80 → 80,000).
-14.	Crear annual_salary_usd aplicando la función sobre la columna de salario anual.
-15.	Crear bonus_usd aplicando la función sobre la columna de compensación adicional.
+**5.  Conversión de salarios a numérico (USD)**
+1.	Definir una función para convertir los campos de salario y compensación (texto) a números:
+    - Remover comas y símbolos monetarios.
+    - Interpretar formatos tipo “80k” como 80,000.
+    - Regla: si el valor numérico es menor a 1000, interpretarlo como miles (ej: 80 → 80,000).
+2.	Crear annual_salary_usd aplicando la función sobre la columna de salario anual.
+3.	Crear bonus_usd aplicando la función sobre la columna de compensación adicional.
 
-## F. Conversión a pesos colombianos (COP)
-16.	Consultar la TRM del día del ejercicio (COP por USD).
-17.	Registrar:
-•	trm (valor numérico)
-•	trm_fecha (fecha)
-18.	Calcular:
-•	salario_anual_cop = annual_salary_usd * trm
-•	compensaciones_cop = bonus_usd * trm
-•	total_comp_cop = salario_anual_cop + compensaciones_cop (tratando nulos como 0)
+**6.  Conversión a pesos colombianos (COP)**
+1.	Consultar la TRM del día del ejercicio (COP por USD).
+2.	Registrar:
+    - trm (valor numérico)
+    - trm_fecha (fecha)
+3.	Calcular:
+    - salario_anual_cop = annual_salary_usd * trm
+    - compensaciones_cop = bonus_usd * trm
+    - total_comp_cop = salario_anual_cop + compensaciones_cop (tratando nulos como 0)
 
-## G. Filtros de calidad para visualización
-19.	Crear el dataset final df_model aplicando filtros mínimos para visualización:
-•	Salario anual no nulo
-•	Salario anual > 0
-•	Eliminación de outliers para evitar distorsión en gráficos
-•	País estandarizado no nulo
-•	
-## H. Exportación del dataset final
-20.	Exportar el dataset final a CSV (ej: ask_a_manager_modelado.csv).
-21.	Usar este archivo como fuente en Looker Studio para actualizar el dashboard
+**7.  Filtros de calidad para visualización**
+1.	Crear el dataset final df_model aplicando filtros mínimos para visualización:
+    - Salario anual no nulo
+    - Salario anual > 0
+    - Eliminación de outliers para evitar distorsión en gráficos
+    - País estandarizado no nulo
+
+**8.  Exportación del dataset final**
+1.	Exportar el dataset final a CSV (ej: ask_a_manager_modelado.csv).
+2.	Usar este archivo como fuente en Looker Studio para actualizar el dashboard
